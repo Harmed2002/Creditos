@@ -24,6 +24,8 @@ alert(`Sr. usuario, el valor de la cuota mensual es: ${lnVlrCuota} a una tasa de
 function obtenerCuotaMensual(pVlrPrestamo, pNumCuotas, pTasa) {
     let lnVlrInteres = pVlrPrestamo * pTasa * pNumCuotas;
     let lnVlrCtaMensual = (pVlrPrestamo + lnVlrInteres) / pNumCuotas;
+    
+    return parseFloat(lnVlrCtaMensual.toFixed(2));
 
-    return lnVlrCtaMensual;
+    //return lnVlrCtaMensual;
 }
