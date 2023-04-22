@@ -1,7 +1,7 @@
 let nombre, vlrPrestamo = 0, numCuotas = 0, vlrCuota = 0, entrarCiclo = true, listaPrestamos = []
 const tasaInt = 0.02;
 
-// Creo la clase préstamo
+// Creo el objeto préstamo
 const Prestamo = function (nombre, vlrPrestamo, numCuotas, tasaInt, vlrCuota) {
 	this.nombre = nombre,
 	this.vlrPrestamo = vlrPrestamo,
