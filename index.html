@@ -19,13 +19,10 @@
         	<h2>Créditos en línea</h2>
 			<h4>Tasa del 2% TNM</h4>
 		</div>
+		<div id="cantCreditos"><h6>Cant. de Créditos: 0</h6></div>
 
         <main class="contenido">
 			<section class="menu">
-				<!--button type="button" class="btn btn-primary" onclick="adicionarPrest()">Crear Nuevo Crédito</!--button>
-				<button type="button" class="btn btn-primary" onclick="adicionarPrest()">Ver Listado de Créditos</button>
-				<button-- type="button" class="btn btn-primary" onclick="adicionarPrest()">Buscar Crédito</button-->
-
 				<div class="card" id="newCredit">
 					<img src="./assets/img/New-Credit.svg" alt="Nuevo Crédito" onclick="mostrarNuevoCredito()">
 					<div class="intro">
@@ -54,6 +51,21 @@
 					<div id="nuevoPrest">
 						<h4>Nuevo Crédito</h4>
 						<div class="row">
+							<div class="col-12 col-sm-6 mb-3">
+								<label for="dptos" class="form-label">Dpto.</label>
+								<select class="form-select" aria-label="Default select example" name="dptos" id="dptos" onchange="obtenerDatosCiudades()" required>
+									<option selected>Seleccione el Dpto.</option>
+								</select>
+							</div>
+							<div class="col-12 col-sm-6 mb-3">
+								<label for="ciudades" class="form-label">Ciudad</label>
+								<select class="form-select" aria-label="Default select example" name="ciudades" id="ciudades" required>
+									<option selected>Seleccione la Ciudad</option>
+								</select>
+							</div>
+						</div>
+
+						<div class="row">
 							<div class="col-12 col-sm-4 mb-3">
 								<label for="cedula" class="form-label">Cédula</label>
 								<input type="number" name="cedula" class="form-control" id="cedula" placeholder="Digita la cédula" required>
@@ -74,10 +86,9 @@
 								<input type="number" name="numCuotas" class="form-control" id="numCuotas" placeholder="Digita las cuotas" required>
 							</div>
 						</div>
-						<button type="button" class="btn btn-primary" onclick="adicionarPrest()">Adicionar</button>
+						<button type="button" class="btn btn-primary" onclick="adicionarPrest()">Ingresar</button>
 					</div>
 				</form>
-
 			</section>
 
 			<section class="listaCred" id="listaCred">
@@ -85,6 +96,8 @@
 					<thead>
 						<tr>
 							<th scope="col">#</th>
+							<th scope="col">Dpto</th>
+							<th scope="col">Ciudad</th>
 							<th scope="col">Cédula</th>
 							<th scope="col">Nombre</th>
 							<th scope="col">Vlr. Solicitado</th>
@@ -99,7 +112,7 @@
 					<tbody id="bodyPrest">
 					</tbody>
 				</table>
-
+				
 				<table class="table table-success table-striped datosTotal" name="tblResumen">
 					<thead>
 						<tr>

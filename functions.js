@@ -1,8 +1,16 @@
-let cedula, nombre, vlrPrestamo = 0, numCuotas = 0, vlrCuota = 0, vlrInteres = 0, fecha = new Date(),  validaDatos = true, listaPrestamos = [];
+let codDpto, comboDpto, nomDpto, codCiudad, comboCiudad, nomCiudad, cedula, nombre, vlrPrestamo = 0, numCuotas = 0, vlrCuota = 0, vlrInteres = 0; 
+let fecha = new Date(),  validaDatos = true, listaPrestamos = [];
 const tasaInt = 0.02;
 
+let numCreditos = localStorage.getItem("numCreditos")	// Obtengo el núm. de créditos realizados a la fecha
+document.getElementById('cantCreditos').innerHTML = "Cant. de Créditos: " + (numCreditos == null ? "0" : numCreditos);
+
 // Creo el objeto préstamo
-const Prestamo = function (cedula, nombre, vlrPrestamo, numCuotas, tasaInt, vlrCuota, vlrInteres, fecha) {
+const Prestamo = function (codDpto, nomDpto, codCiudad, nomCiudad, cedula, nombre, vlrPrestamo, numCuotas, tasaInt, vlrCuota, vlrInteres, fecha) {
+	this.codDpto		= codDpto,
+	this.nomDpto		= nomDpto,
+	this.CodCiudad		= codCiudad,
+	this.nomCiudad		= nomCiudad,
 	this.cedula			= cedula,
 	this.nombre			= nombre,
 	this.vlrPrestamo	= vlrPrestamo,
@@ -15,6 +23,12 @@ const Prestamo = function (cedula, nombre, vlrPrestamo, numCuotas, tasaInt, vlrC
 
 function adicionarPrest() {
 	validaDatos = true
+	codDpto		= document.getElementById("dptos").value;
+	comboDpto	= document.getElementById("dptos");
+	nomDpto		= comboDpto.options[comboDpto.selectedIndex].text;
+	codCiudad	= document.getElementById("ciudades").value;
+	comboCiudad = document.getElementById("ciudades");
+	nomCiudad	= comboCiudad.options[comboCiudad.selectedIndex].text;
 	cedula		= document.getElementById("cedula").value;
 	nombre		= document.getElementById("nombre").value;
 	nombre		= nombre.toLowerCase();
@@ -23,8 +37,9 @@ function adicionarPrest() {
 	const FORM	= document.getElementById("frmPrestamos");
 
 	if (validarDatos(cedula, nombre, vlrPrestamo, numCuotas)) {
-		ingresarPrestamo(cedula, nombre, vlrPrestamo, numCuotas, fecha.toLocaleDateString());
+		ingresarPrestamo(codDpto, nomDpto, codCiudad, nomCiudad, cedula, nombre, vlrPrestamo, numCuotas, fecha.toLocaleDateString());
 		FORM.reset();
+		document.getElementById("ciudades").innerHTML = "";		// Blanqueo el select de ciudad
 		document.getElementById("cedula").focus();
 	}
 
@@ -85,19 +100,21 @@ function obtenerIntereses(valorPrestamo, numeroCuotas, tasaInteres) {
 	return valorInteres;
 }
 
-function ingresarPrestamo(cedula, nombre, vlrPrestamo, numCuotas, fecha) {
+function ingresarPrestamo(codDpto, nomDpto, codCiudad, nomCiudad, cedula, nombre, vlrPrestamo, numCuotas, fecha) {
 	// llamo la función de cálculo de cuota
 	vlrCuota = obtenerCuotaMensual(vlrPrestamo, numCuotas, tasaInt);
 	vlrInteres = obtenerIntereses(vlrPrestamo, numCuotas, tasaInt);
 
 	// Instancio Prestamo
-	let prestamo = new Prestamo(cedula, nombre, vlrPrestamo, numCuotas, tasaInt, vlrCuota, vlrInteres, fecha);
+	let prestamo = new Prestamo(codDpto, nomDpto, codCiudad, nomCiudad, cedula, nombre, vlrPrestamo, numCuotas, tasaInt, vlrCuota, vlrInteres, fecha);
 
 	// Ingreso el prestamo en la lista
 	listaPrestamos.push(prestamo);
 
 	// Adicionamos el registro en las tablas html
 	adicionarItem();
+
+	registrarLocalStorage();
 
 	// Mostramos el mensaje
 	Swal.fire({
@@ -120,6 +137,8 @@ function adicionarItem() {
 		item++;
 		result += `<tr>
 						<td>${ item }</td>
+						<td>${ Prestamo.nomDpto }</td>
+						<td>${ Prestamo.nomCiudad }</td>
 						<td>${ Prestamo.cedula }</td>
 						<td>${ Prestamo.nombre }</td>
 						<td>${ new Intl.NumberFormat().format(Prestamo.vlrPrestamo) }</td>
@@ -176,7 +195,8 @@ function mostrarListaCreditos() {
 
 function buscarCredito() {
 	Swal.fire({
-		title: 'Ingresa el nombre del cliente cuyo crédito desea buscar',
+		title: 'Buscar Créditos',
+		text: "Ingresa el nombre del cliente cuyo crédito desea buscar:",
 		input: 'text',
 		showCancelButton: true,
 		confirmButtonText: 'Buscar',
@@ -218,4 +238,63 @@ function buscarCredito() {
 		}
 	});
   
+}
+
+function registrarLocalStorage() {
+	numCreditos++;
+	localStorage.setItem("numCreditos", numCreditos);
+	document.getElementById('cantCreditos').innerHTML = "Cant. de Créditos: " + numCreditos;
+}
+
+const API_DPTOSYMUN = 'https://www.datos.gov.co/resource/xdk5-pm3f.json'
+const CAMPO_DPTOS = document.getElementById('dptos');
+
+fetch(`${API_DPTOSYMUN}`)
+.then(response => response.json())
+.then(data => llenarSelectDptos(data))
+.catch(error => console.log(error))
+
+
+function llenarSelectDptos(dataJson) {
+	let CodDpto = '', nomDpto = '', dptos = [], yaExiste = false;
+
+	for (let row of dataJson) {
+		CodDpto = row.c_digo_dane_del_departamento;
+		nomDpto = row.departamento;
+		// Verifico si el dpto ya fue ingresado
+		yaExiste = dptos.some((el) => el == row.c_digo_dane_del_departamento);
+		if (!yaExiste) {
+			dptos.push(CodDpto);
+			let newOption = document.createElement("option");
+			newOption.value = CodDpto;
+			newOption.text = nomDpto;
+			CAMPO_DPTOS.add(newOption);
+		}
+	}
+}
+
+function obtenerDatosCiudades(){
+	let codDpto = document.getElementById("dptos").value;	// Obtengo el cod. de dpto. seleccionado
+	const API_CIUDADES = 'https://www.datos.gov.co/resource/xdk5-pm3f.json?c_digo_dane_del_departamento=' + codDpto;
+
+	fetch(`${API_CIUDADES}`)
+	.then(response => response.json())
+	.then(data => llenarSelectCiudades(data))
+	.catch(error => console.log(error))
+}
+
+function llenarSelectCiudades(dataJson) {
+	let CodCiudad = '', nomCiudad = '';
+	document.getElementById("ciudades").innerHTML = "";		// Blanqueo el select de ciudad
+	const CAMPO_CIUDADES = document.getElementById('ciudades');
+
+	for (let row of dataJson) {
+		CodCiudad = row.c_digo_dane_del_municipio;
+		nomCiudad = row.municipio;
+
+		let newOption = document.createElement("option");
+		newOption.value = CodCiudad;
+		newOption.text = nomCiudad;
+		CAMPO_CIUDADES.add(newOption);
+	}
 }
